@@ -1,5 +1,9 @@
 config/database.php
 storage/documents/*
 storage/job-notifications/*
+storage/payment-receipts/*
+storage/payment-qr/*
 !storage/documents/.htaccess
 !storage/job-notifications/.htaccess
+!storage/payment-receipts/.htaccess
+!storage/payment-qr/.htaccess
