@@ -1,6 +1,6 @@
 Options -Indexes
 RewriteEngine On
-<FilesMatch "^(database\.php|ai\.php|notifications\.php|schema\.sql|.*\.sql|\.env|composer\.(json|lock))$">
+<FilesMatch "^(schema\.sql|.*\.sql|\.env|composer\.(json|lock))$">
   Require all denied
 </FilesMatch>
 <IfModule mod_headers.c>
