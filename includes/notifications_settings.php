@@ -8,7 +8,11 @@
 function get_notification_settings(PDO $pdo): array {
     static $cache = null;
     if ($cache !== null) return $cache;
-    $row = $pdo->query("SELECT * FROM app_notification_settings WHERE id=1 LIMIT 1")->fetch();
+    try {
+        $row = $pdo->query("SELECT * FROM app_notification_settings WHERE id=1 LIMIT 1")->fetch();
+    } catch (Throwable $e) {
+        $row = false; // table not migrated yet — fall back to safe defaults below
+    }
     if (!$row) {
         $row = [
             'email_provider' => 'hostinger', 'smtp_host' => null, 'smtp_port' => 587,

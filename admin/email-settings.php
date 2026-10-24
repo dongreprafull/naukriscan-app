@@ -19,17 +19,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ];
             // Only overwrite the stored password if a new one was typed (field left blank keeps the existing one).
             if (trim($_POST['smtp_password'] ?? '') !== '') { $fields['smtp_password'] = trim($_POST['smtp_password']); }
-            update_notification_settings($pdo, $fields);
-            flash('success', 'Email settings saved.');
+            try {
+                update_notification_settings($pdo, $fields);
+                flash('success', 'Email settings saved.');
+            } catch (Throwable $e) {
+                flash('error', 'Could not save — the email-settings table is not set up yet. Run sql/v21-email-system.sql first.');
+            }
             redirect('email-settings.php');
         }
     }
 }
-$cfg = $pdo->query("SELECT * FROM app_notification_settings WHERE id=1 LIMIT 1")->fetch();
+$tableMissing = false;
+try {
+    $cfg = $pdo->query("SELECT * FROM app_notification_settings WHERE id=1 LIMIT 1")->fetch();
+} catch (Throwable $e) {
+    $tableMissing = true; $cfg = false;
+}
 if (!$cfg) { $cfg = ['email_provider'=>'hostinger','from_email'=>'noreply@naukriscan.in','from_name'=>'NaukriScan','smtp_host'=>'','smtp_port'=>587,'smtp_username'=>'','smtp_encryption'=>'tls']; }
 $page_title='Email Settings'; $asset_prefix='../'; $home_link='../index.php'; require '../includes/header.php';
 ?>
 <div class="page-head"><div><span class="eyebrow">ADMIN</span><h1>Email Settings</h1><p class="muted">Controls how NaukriScan sends job-match alerts and verification emails.</p></div></div>
+<?php if($tableMissing):?><div class="alert error">The email-settings table isn't set up yet. Run <code>sql/v21-email-system.sql</code> in phpMyAdmin, then reload this page. Showing defaults below (not yet saved).</div><?php endif;?>
 <?php if($error):?><div class="alert error"><?=e($error)?></div><?php endif;?>
 <div class="card">
 <form method="post">
