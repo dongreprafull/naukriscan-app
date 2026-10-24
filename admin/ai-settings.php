@@ -1,5 +1,5 @@
 <?php
-require_once '../config/app.php'; require_once '../includes/security.php'; start_secure_session(); require_permission('settings.manage'); require_once '../includes/settings.php';
+require_once '../config/app.php'; require_once '../includes/security.php'; require_once '../config/ai.php'; start_secure_session(); require_permission('settings.manage'); require_once '../includes/settings.php';
 $pdo = db(); $error = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
