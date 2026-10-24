@@ -1,0 +1,5 @@
+config/database.php
+storage/documents/*
+storage/job-notifications/*
+!storage/documents/.htaccess
+!storage/job-notifications/.htaccess

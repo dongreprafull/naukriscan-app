@@ -1,0 +1,8 @@
+<?php
+require_once '../config/app.php';require_once '../includes/security.php';start_secure_session();require_user();require_once '../includes/matching.php';$pdo=db();
+$jobs=$pdo->query("SELECT * FROM jobs WHERE status='published' AND (closing_date IS NULL OR closing_date>=CURDATE()) ORDER BY closing_date IS NULL,closing_date ASC,created_at DESC")->fetchAll();
+foreach($jobs as &$j)$j['_match']=calculate_job_match($pdo,(int)$_SESSION['user_id'],(int)$j['id']);unset($j);
+$page_title='Government Jobs';$asset_prefix='../';$home_link='../index.php';require '../includes/header.php';?>
+<div class="page-head"><div><span class="eyebrow">GOVERNMENT JOBS</span><h1>Jobs For You</h1><p class="muted">Eligibility assistance is calculated from your profile and published rules.</p></div><a class="btn btn-light" href="profile.php">Update Profile</a></div>
+<div class="job-list"><?php foreach($jobs as $j):?><div class="card job-card"><div><span class="tag"><?=e($j['organization'])?></span><h2><?=e($j['job_title'])?></h2><p><?=e($j['short_description'])?></p><p><b><?=e($j['_match']['score'])?>% match</b> · <?=e($j['_match']['status'])?> · Last Date: <?=e($j['closing_date']?:'—')?></p></div><a class="btn btn-primary" href="job-details.php?id=<?=e($j['id'])?>">View Match</a></div><?php endforeach;if(!$jobs):?><div class="empty">No published jobs yet.</div><?php endif;?></div>
+<?php require '../includes/footer.php';?>

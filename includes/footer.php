@@ -1,0 +1,1 @@
+</main><?php if(!empty($_SESSION['admin_id']) || !empty($_SESSION['user_id'])): ?></div></div><?php endif; ?><footer><div class="container">© <?=date('Y')?> <?=e(APP_NAME)?> · Official recruitment source remains the final authority.</div></footer></body></html>
