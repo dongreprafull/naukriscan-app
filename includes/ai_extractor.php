@@ -1,12 +1,30 @@
 <?php
 require_once __DIR__ . '/../config/ai.php';
+require_once __DIR__ . '/settings.php';
 
 if (!defined('AI_PROMPT_VERSION')) define('AI_PROMPT_VERSION', 'v2');
+
+/**
+ * The OpenAI API key and model can be set in two ways: as the
+ * OPENAI_API_KEY / OPENAI_API_MODEL environment variables (config/ai.php),
+ * or — much easier on shared hosting with no shell/env access — pasted
+ * into Admin → AI Settings, stored in system_settings. The admin-panel
+ * value wins when present.
+ */
+function ai_api_key(): string {
+    try { $v = get_setting(db(), 'ai_openai_api_key', ''); if ($v !== '') return $v; } catch (Throwable $e) {}
+    return OPENAI_API_KEY;
+}
+function ai_model_name(): string {
+    try { $v = get_setting(db(), 'ai_model', ''); if ($v !== '') return $v; } catch (Throwable $e) {}
+    return AI_MODEL;
+}
 
 function ai_extract_notification(string $sourceText): array {
     $sourceText = trim($sourceText);
     if ($sourceText === '') throw new RuntimeException('Notification text is empty.');
-    if (OPENAI_API_KEY === '') throw new RuntimeException('OPENAI_API_KEY is not configured on the server.');
+    $apiKey = ai_api_key();
+    if ($apiKey === '') throw new RuntimeException('OpenAI API key is not configured. Set it in Admin → AI Settings.');
 
     $schema = [
         'type'=>'object',
@@ -62,7 +80,7 @@ function ai_extract_notification(string $sourceText): array {
     ];
 
     $payload = [
-        'model'=>AI_MODEL,
+        'model'=>ai_model_name(),
         'input'=>[
             [
                 'role'=>'system',
@@ -96,7 +114,7 @@ function ai_extract_notification(string $sourceText): array {
     curl_setopt_array($ch,[
         CURLOPT_POST=>true,
         CURLOPT_HTTPHEADER=>[
-            'Authorization: Bearer '.OPENAI_API_KEY,
+            'Authorization: Bearer '.$apiKey,
             'Content-Type: application/json'
         ],
         CURLOPT_POSTFIELDS=>json_encode($payload, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES),
